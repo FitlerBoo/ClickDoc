@@ -13,35 +13,7 @@ namespace ClickDoc.Models
     class AcceptanceTransferActContractData : IContractData
     {
         private readonly Dictionary<string, string> _fields;
-        [Required] public string? ActNumber { get; set; } // 1
-
-        [Required] public string? ActDate { get; set; } // 2
-
-        [Required] public string? PerformerFullName {  get; set; } // 3
-        [Required] public string? PerformerINN { get; set; }
-
-        [Required] public string? ContractNumber { get; set; } // 4
-        [Required] public string? ContractDate { get; set; }
-
-
-        [Required] public string? PeriodStart { get; set; } // 5
-        [Required] public string? PeriodEnd { get; set; }
-
-        [Required] public string? ServiceType { get; set; } // 6
-        [Required] public string? UnitCost { get; set; }
-        [Required] public string? UnitCount { get; set; }
-        [Required] public string? TotalCost { get; set; }
-
-        [Required] public string? InvoiceNumber { get; set; } // 7
-        [Required] public string? InvoiceDate { get; set; }
-
-        [Required] public string? PriceInText { get; set; } // 8
-
-        [Required] public string? LastDate { get; set; } // 9
-        [Required] public string? PerformerSurnameInitials { get; set; }
-
-
-
+        
         public AcceptanceTransferActContractData(FormData formData)
             => _fields = ConvertFormData(formData);
 

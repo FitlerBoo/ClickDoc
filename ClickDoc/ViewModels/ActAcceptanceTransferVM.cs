@@ -1,6 +1,8 @@
-﻿using ClickDoc.Models;
+﻿using ClickDoc.Generators;
+using ClickDoc.Models;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Office.Interop.Word;
 using ReactiveValidation;
 using System.DirectoryServices;
 using System.Windows.Input;
@@ -19,6 +21,7 @@ namespace ClickDoc.ViewModels
             CreateCommand = new RelayCommand(CreateDocument);
         }
 
+        #region Properties
         public decimal UnitCost
         {
             get => _formData.UnitCost;
@@ -157,11 +160,13 @@ namespace ClickDoc.ViewModels
                 OnPropertyChanged(nameof(LastDate)); 
             }
         }
+        #endregion
 
         private void CreateDocument()
         {
             var contractData = new AcceptanceTransferActContractData(_formData);
-
+            var generator = new WordPdfDocumentGenerator();
+            generator.GenerateAsync(contractData, "D:\\ClickDoc\\ClickDoc\\ClickDoc\\Templates\\AcceptanceTransferAct.docx", "\"C:\\Users\\Max\\Desktop");
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using ClickDoc.Models;
-using iTextSharp.text.log;
 using System.IO;
 using System.Runtime.InteropServices;
 using Word = Microsoft.Office.Interop.Word;

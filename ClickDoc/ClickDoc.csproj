@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Services\" />
     <Folder Include="Contracts\" />
-    <Folder Include="Templates\" />
   </ItemGroup>
 
   <ItemGroup>
