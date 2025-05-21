@@ -3,8 +3,6 @@ using ClickDoc.Utils;
 using ClickDoc.ViewModels;
 using ClickDoc.Views;
 using Microsoft.Extensions.DependencyInjection;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 
 namespace ClickDoc
@@ -33,7 +31,7 @@ namespace ClickDoc
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MainWindowVM>();
 
-            services.AddTransient<ActAcceptanceTransferVM>();
+            services.AddTransient<AcceptanceTransferActVM>();
             services.AddTransient<ActAcceptanceTransferWindow>();
 
             services.AddTransient<AcceptanceTransferActContractData>();

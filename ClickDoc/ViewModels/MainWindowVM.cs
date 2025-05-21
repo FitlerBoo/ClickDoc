@@ -2,21 +2,14 @@
 using ClickDoc.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows.Navigation;
 
 namespace ClickDoc.ViewModels
 {
     public class MainWindowVM : ObservableObject
     {
-        private INavigationService _navigationService;
+        private readonly INavigationService _navigationService;
 
         public ICommand LoadDocumentCommand { get; }
         public ICommand CreateCommand { get; }

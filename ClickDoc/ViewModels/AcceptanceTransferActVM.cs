@@ -1,22 +1,25 @@
 ﻿using ClickDoc.Generators;
 using ClickDoc.Models;
+using ClickDoc.Utils;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Office.Interop.Word;
 using ReactiveValidation;
-using System.DirectoryServices;
+using System.IO;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ClickDoc.ViewModels
 {
-    public class ActAcceptanceTransferVM : ValidatableObject
+    public class AcceptanceTransferActVM : ValidatableObject
     {
-        private IServiceProvider _serviceProvider;
-        private FormData _formData = new ();
+        private readonly IServiceProvider _serviceProvider;
+        private readonly INavigationService _navigationService;
+        private FormData _formData;
         public ICommand CreateCommand { get; }
-        public ActAcceptanceTransferVM(IServiceProvider serviceProvider)
+        public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+            _navigationService = serviceProvider.GetRequiredService<INavigationService>();
             _formData = _serviceProvider.GetRequiredService<FormData>();
             CreateCommand = new RelayCommand(CreateDocument);
         }
@@ -46,28 +49,28 @@ namespace ClickDoc.ViewModels
         public string ActNumber
         {
             get => _formData.ActNumber;
-            set 
-            { 
-                _formData.ActNumber = value; 
-                OnPropertyChanged(nameof(ActNumber)); 
+            set
+            {
+                _formData.ActNumber = value;
+                OnPropertyChanged(nameof(ActNumber));
             }
         }
 
         public string PerformerFullName
         {
             get => _formData.PerformerFullName;
-            set 
-            { 
-                _formData.PerformerFullName = value; 
-                OnPropertyChanged(nameof(PerformerFullName)); 
+            set
+            {
+                _formData.PerformerFullName = value;
+                OnPropertyChanged(nameof(PerformerFullName));
             }
         }
 
         public string PerformerINN
         {
             get => _formData.PerformerINN;
-            set 
-            { 
+            set
+            {
                 _formData.PerformerINN = value;
                 OnPropertyChanged(nameof(PerformerINN));
             }
@@ -77,7 +80,7 @@ namespace ClickDoc.ViewModels
         {
             get => _formData.ContractNumber;
             set
-            { 
+            {
                 _formData.ContractNumber = value;
                 OnPropertyChanged(nameof(ContractNumber));
             }
@@ -86,15 +89,18 @@ namespace ClickDoc.ViewModels
         public string ServiceTypeDescription
         {
             get => _formData.ServiceTypeDescription;
-            set { _formData.ServiceTypeDescription = value;
-                OnPropertyChanged(nameof(ServiceTypeDescription)); }
+            set
+            {
+                _formData.ServiceTypeDescription = value;
+                OnPropertyChanged(nameof(ServiceTypeDescription));
+            }
         }
 
         public string InvoiceNumber
         {
             get => _formData.InvoiceNumber;
-            set 
-            { 
+            set
+            {
                 _formData.InvoiceNumber = value;
                 OnPropertyChanged(nameof(InvoiceNumber));
             }
@@ -104,18 +110,18 @@ namespace ClickDoc.ViewModels
         public DateTime ActDate
         {
             get => _formData.ActDate;
-            set 
-            { 
-                _formData.ActDate = value; 
-                OnPropertyChanged(nameof(ActDate)); 
+            set
+            {
+                _formData.ActDate = value;
+                OnPropertyChanged(nameof(ActDate));
             }
         }
 
         public DateTime ContractDate
         {
             get => _formData.ContractDate;
-            set 
-            { 
+            set
+            {
                 _formData.ContractDate = value;
                 OnPropertyChanged(nameof(ContractDate));
             }
@@ -124,49 +130,61 @@ namespace ClickDoc.ViewModels
         public DateTime PeriodStart
         {
             get => _formData.PeriodStart;
-            set 
-            { 
-                _formData.PeriodStart = value; 
-                OnPropertyChanged(nameof(PeriodStart)); 
+            set
+            {
+                _formData.PeriodStart = value;
+                OnPropertyChanged(nameof(PeriodStart));
             }
         }
 
         public DateTime PeriodEnd
         {
             get => _formData.PeriodEnd;
-            set 
-            { 
-                _formData.PeriodEnd = value; 
-                OnPropertyChanged(nameof(PeriodEnd)); 
+            set
+            {
+                _formData.PeriodEnd = value;
+                OnPropertyChanged(nameof(PeriodEnd));
             }
         }
 
         public DateTime InvoiceDate
         {
             get => _formData.InvoiceDate;
-            set 
-            { 
-                _formData.InvoiceDate = value; 
-                OnPropertyChanged(nameof(InvoiceDate)); 
+            set
+            {
+                _formData.InvoiceDate = value;
+                OnPropertyChanged(nameof(InvoiceDate));
             }
         }
 
         public DateTime LastDate
         {
             get => _formData.LastDate;
-            set 
-            { 
-                _formData.LastDate = value; 
-                OnPropertyChanged(nameof(LastDate)); 
+            set
+            {
+                _formData.LastDate = value;
+                OnPropertyChanged(nameof(LastDate));
             }
         }
         #endregion
 
-        private void CreateDocument()
+        private async void CreateDocument()
         {
             var contractData = new AcceptanceTransferActContractData(_formData);
             var generator = new WordPdfDocumentGenerator();
-            generator.GenerateAsync(contractData, "D:\\ClickDoc\\ClickDoc\\ClickDoc\\Templates\\AcceptanceTransferAct.docx", "\"C:\\Users\\Max\\Desktop");
+
+            var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
+            var outputPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                "AcceptanceTransferAct.pdf");
+
+            await generator.GenerateAsync(contractData,
+                templatePath,
+                outputPath);
+
+            MessageBox.Show("Файл успешно создан");
+            _navigationService.CloseCurrentWindow();
         }
     }
 }

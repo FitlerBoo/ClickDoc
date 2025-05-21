@@ -1,16 +1,10 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace ClickDoc.Utils
 {
     public static class DateFormatter
     {
-        private static string[] monthsGenitive = [ "января", "февраля", "марта", "апреля", "мая", "июня",
+        private static readonly string[] monthsGenitive = [ "января", "февраля", "марта", "апреля", "мая", "июня",
                             "июля", "августа", "сентября", "октября", "ноября", "декабря" ];
 
         /// <summary>

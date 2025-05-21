@@ -1,22 +1,12 @@
 ﻿using ClickDoc.Views;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace ClickDoc.Utils
 {
-    public class NavigationService : INavigationService
+    public class NavigationService(IServiceProvider serviceProvider) : INavigationService
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public NavigationService(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public void NavigateTo<T>() where T : Window
         {
@@ -24,7 +14,7 @@ namespace ClickDoc.Utils
             window.Show();
         }
 
-        private void CloseCurrentWindow()
+        public void CloseCurrentWindow()
         {
             Application.Current.Windows.OfType<Window>()
                 .SingleOrDefault(w => w.IsActive)?

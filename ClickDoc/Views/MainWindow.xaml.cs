@@ -1,6 +1,4 @@
-﻿using ClickDoc.Utils;
-using ClickDoc.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
+﻿using ClickDoc.ViewModels;
 using System.Windows;
 
 namespace ClickDoc

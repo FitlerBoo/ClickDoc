@@ -1,21 +1,11 @@
 ﻿using ClickDoc.Utils;
-using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClickDoc.Models
 {
-    class AcceptanceTransferActContractData : IContractData
+    class AcceptanceTransferActContractData(FormData formData) : IContractData
     {
-        private readonly Dictionary<string, string> _fields;
-        
-        public AcceptanceTransferActContractData(FormData formData)
-            => _fields = ConvertFormData(formData);
+        private readonly Dictionary<string, string> _fields = ConvertFormData(formData);
 
         public string GetFieldValue(string fieldName)
             => _fields.TryGetValue(fieldName, out var value) ? value : null;
