@@ -1,5 +1,4 @@
-﻿using ClickDoc.Views;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace ClickDoc.Utils
@@ -10,7 +9,7 @@ namespace ClickDoc.Utils
 
         public void NavigateTo<T>() where T : Window
         {
-            var window = _serviceProvider.GetRequiredService<ActAcceptanceTransferWindow>();
+            var window = _serviceProvider.GetRequiredService<T>();
             window.Show();
         }
 

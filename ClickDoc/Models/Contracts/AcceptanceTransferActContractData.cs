@@ -33,8 +33,11 @@ namespace ClickDoc.Models
 
                 ["ActDate"] = DateFormatter.FormatDateWithQuotedDay(data.ActDate),
 
-                ["PerformerFullName"] = data.PerformerFullName,
-                ["PerformerINN"] = data.PerformerINN,
+                ["EntrepreneurFullName"] = data.EntrepreneurFullName,
+                ["EntrepreneurOGRNIP"] = data.OGRNIP,
+
+                ["PerformerFullName"] = data.ContractorFullName,
+                ["PerformerINN"] = data.ContractorINN,
 
                 ["ContractNumber"] = data.ContractNumber,
                 ["ContractDate"] = DateFormatter.FormatShort(data.ContractDate),
@@ -53,7 +56,8 @@ namespace ClickDoc.Models
                 ["PriceInText"] = CostFormatter.CostToWordsFormat(data.UnitCount * data.UnitCost),
 
                 ["LastDate"] = DateFormatter.FormatShort(data.LastDate),
-                ["PerformerSurnameInitials"] = FullnameFormatter.GetInitials(data.PerformerFullName)
+                ["EntrepreneurSurnameInitials"] = FullnameFormatter.GetInitials(data.EntrepreneurFullName),
+                ["ContractorSurnameInitials"] = FullnameFormatter.GetInitials(data.ContractorFullName)
             };
         }
     }

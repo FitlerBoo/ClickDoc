@@ -3,7 +3,7 @@ using Spire.Doc;
 
 namespace ClickDoc.Generators
 {
-    class WordPdfDocumentGenerator : IDocumentGenerator
+    public class PdfDocumentGenerator : IDocumentGenerator
     {
         public async Task GenerateAsync(IContractData contractData, string templatePath, string outputPath)
         {
@@ -12,13 +12,13 @@ namespace ClickDoc.Generators
                 using var doc = new Document();
                 doc.LoadFromFile(templatePath);
 
-                
+
                 foreach (var field in contractData.GetFieldNames())
                 {
                     string placeholder = $"[{field}]";
                     string value = contractData.GetFieldValue(field) ?? string.Empty;
 
-                    
+
                     doc.Replace(placeholder, value, false, true);
                 }
 

@@ -6,8 +6,11 @@
 
         public DateTime ActDate { get; set; } = DateTime.Now; // 2
 
-        public string PerformerFullName { get; set; } = string.Empty; // 3
-        public string PerformerINN { get; set; } = string.Empty; // 4
+        public string EntrepreneurFullName { get; set; } = string.Empty;
+        public string OGRNIP { get; set; } = string.Empty;
+
+        public string ContractorFullName { get; set; } = string.Empty; // 3
+        public string ContractorINN { get; set; } = string.Empty; // 4
 
         public string ContractNumber { get; set; } = string.Empty; // 5
         public DateTime ContractDate { get; set; } = DateTime.Now; // 6

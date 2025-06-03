@@ -1,0 +1,76 @@
+﻿<Window x:Class="ClickDoc.Views.Contracts.ContractsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClickDoc.Views.Contracts"
+        xmlns:vm="clr-namespace:ClickDoc.ViewModels.Contracts"
+        d:DataContext="{d:DesignInstance vm:ContractsVM}"
+        mc:Ignorable="d"
+        Title="ClickDoc" Height="800" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="292*"/>
+            <RowDefinition Height="15*"/>
+            <RowDefinition Height="90"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Договоры"
+    Style="{StaticResource LabelBaseStyle}"
+    HorizontalAlignment="Center"
+    FontSize="24"/>
+
+        <ListView Grid.Row="1"
+                  ItemsSource="{Binding Contracts}"
+                  SelectedItem="{Binding SelectedItem}"
+                  SelectionMode="Single"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  FontSize="16" Grid.RowSpan="2">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="200" Header="Номер договора">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ContractNumber}"
+                                           HorizontalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="300" Header="Предприниматель">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Entrepreneur.FullName}"
+                                           TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="300" Header="Исполнитель">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Contractor.FullName}"
+                                           TextAlignment="Center" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Grid.RowSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <Button Content="Вернуться в меню"
+                    Width="135" Height="40"
+                    Command="{Binding BackCommand}"/>
+            <Button Content="Удалить договор"
+                    Margin="140, 0, 140, 0"
+                    Width="135" Height="40"
+                    Command="{Binding DeleteCommand}"
+                    IsEnabled="{Binding IsItemSelected}"/>
+            <Button Content="Добавить договор"
+                    Width="135" Height="40"
+                    Command="{Binding CreateNewCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

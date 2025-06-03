@@ -6,9 +6,9 @@ namespace ClickDoc
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainMenuWindow : Window
     {
-        public MainWindow(MainWindowVM vm)
+        public MainMenuWindow(MainMenuVM vm)
         {
             InitializeComponent();
             DataContext = vm;

@@ -2,8 +2,8 @@
 
 namespace ClickDoc.Generators
 {
-    interface IDocumentGenerator
+    public interface IDocumentGenerator
     {
-        Task GenerateAsync(IContractData contractData, string templatePath, string outputPdfPath);
+        Task GenerateAsync(IContractData contractData, string templatePath, string outputPath);
     }
 }
