@@ -58,7 +58,8 @@
             <Button Command="{Binding CreateCommand}"
                     Width="120" Height="40"
                     Margin="20, 0, 20 , 0">
-                <TextBlock Text="Добавить" />
+                <TextBlock Text="Добавить"
+                           IsEnabled="{Binding IsButtonEnabled}"/>
             </Button>
         </StackPanel>
     </Grid>

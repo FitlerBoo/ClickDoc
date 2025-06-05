@@ -19,7 +19,11 @@ namespace ClickDoc.ViewModels
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
         private readonly IRepository<ContractEntity> _repository;
+        private readonly INotificationService _notificationService;
+        private IGeneratorFactory _generatorFactory;
         private ObservableCollection<ContractEntity> _contracts = [];
+        private bool _isButtonEnabled = true;
+        private DocumentGeneratorType _selectedGeneratorType = DocumentGeneratorType.Word;
         public ObservableCollection<ContractEntity> Contracts
         {
             get => _contracts;
@@ -32,33 +36,52 @@ namespace ClickDoc.ViewModels
         private ContractEntity _selectedItem;
 
         private FormData _formData;
-        private string _filename;
+        private string _filename = "Акт приема-передачи оказанных услуг";
         public ICommand CreateCommand { get; }
         public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _navigationService = serviceProvider.GetRequiredService<INavigationService>();
             _repository = serviceProvider.GetRequiredService<IRepository<ContractEntity>>();
+            _notificationService = serviceProvider.GetRequiredService<INotificationService>();
+            _generatorFactory = serviceProvider.GetRequiredService<IGeneratorFactory>();
             _repository.ItemAdded += OnItemAdded;
             _repository.ItemRemoved += OnItemRemoved;
             _formData = _serviceProvider.GetRequiredService<FormData>();
-            CreateCommand = new RelayCommand(CreateDocument);
+            CreateCommand = new AsyncRelayCommand(CreateDocument);
 
             LoadDataAsync();
         }
 
         private async Task LoadDataAsync()
         {
-            var entities = await _repository.GetAll();
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Contracts.Clear();
-                foreach (var entity in entities)
-                    Contracts.Add(entity);
-            });
+                var entities = await _repository.GetAll();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Contracts.Clear();
+                    foreach (var entity in entities)
+                        Contracts.Add(entity);
+                });
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(
+                    $"Ошибка загрузки элементов из базы данных\n{ex.Message}");
+            }
         }
 
         #region Properties
+        public bool IsButtonEnabled
+        {
+            get => _isButtonEnabled;
+            set
+            {
+                _isButtonEnabled = value;
+                OnPropertyChanged(nameof(IsButtonEnabled));
+            }
+        }
         public ContractEntity SelectedItem
         {
             get => _selectedItem;
@@ -83,8 +106,6 @@ namespace ClickDoc.ViewModels
         }
 
         #region Generator
-        private DocumentGeneratorType _selectedGeneratorType = DocumentGeneratorType.Word;
-
         public DocumentGeneratorType SelectedGeneratorType
         {
             get => _selectedGeneratorType;
@@ -100,7 +121,7 @@ namespace ClickDoc.ViewModels
             => GeneratorFactory.GeneratorTypeDisplayNames;
 
         public IDocumentGenerator Generator
-            => GeneratorFactory.GetGenerator(SelectedGeneratorType);
+            => _generatorFactory.GetGenerator(SelectedGeneratorType);
 
         #endregion
 
@@ -225,30 +246,26 @@ namespace ClickDoc.ViewModels
         }
         #endregion
 
-        private async void CreateDocument()
+        private async Task CreateDocument()
         {
-            _navigationService.CloseCurrentWindow();
             var contractData = new AcceptanceTransferActContractData(_formData);
-            var generator = Generator;
-
-            var format = SelectedGeneratorType switch
+            try
             {
-                DocumentGeneratorType.Pdf => ".pdf",
-                DocumentGeneratorType.Word => ".docx",
-                _ => ".docx"
-            };
-
-            var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
-
-            var outputPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                $"{FileName}{format}");
-
-            await generator.GenerateAsync(contractData,
-                templatePath, outputPath);
-
-            MessageBox.Show("Файл успешно создан");
+                IsButtonEnabled = false;
+                var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var generator = Generator;
+                var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
+                await generator.GenerateAsync(contractData,
+                templatePath, _filename);
+                _notificationService.ShowSuccess($"Файл {FileName} успешно создан на рабочем столе");
+                IsButtonEnabled = true;
+                _navigationService.CloseCurrentWindow();
+            }
+            catch (Exception ex)
+            {
+                IsButtonEnabled = true;
+                _notificationService.ShowError($"Ошибка пути к шаблону:\n{ex.Message}");
+            }
         }
 
         private void OnItemRemoved(ContractEntity entity)
@@ -261,9 +278,16 @@ namespace ClickDoc.ViewModels
         {
             Application.Current.Dispatcher.Invoke(async () =>
             {
-                var fullEntity = await _repository.GetById(entity.Id);
-                if (fullEntity != null)
-                    Contracts.Add(entity);
+                try
+                {
+                    var fullEntity = await _repository.GetById(entity.Id);
+                    if (fullEntity != null)
+                        Contracts.Add(entity);
+                }
+                catch (Exception ex)
+                {
+                    _notificationService.ShowError($"Ошибка загрузки элемента из базы данных\n{ex.Message}");
+                }
             });
 
         }

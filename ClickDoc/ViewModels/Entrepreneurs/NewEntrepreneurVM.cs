@@ -2,22 +2,36 @@
 using ClickDoc.Database.Repositories;
 using ClickDoc.Utils;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using ReactiveValidation;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Input;
 
 namespace ClickDoc.ViewModels.Entrepreneurs
 {
-    public class NewEntrepreneurVM : ViewModelBase
+    public class NewEntrepreneurVM : ValidatableObject
     {
         private string _surname = string.Empty;
         private string _name = string.Empty;
         private string _patronymic = string.Empty;
         private string _ogrnip = string.Empty;
-
+        private bool _isButtonEnabled = true;
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigation;
         private readonly IRepository<EntrepreneurEntity> _repository;
+        private readonly INotificationService _notificationService;
+
+        public bool IsButtonEnabled
+        {
+            get => _isButtonEnabled;
+            set
+            {
+                _isButtonEnabled = value;
+                OnPropertyChanged(nameof(IsButtonEnabled));
+            }
+        }
 
         public ICommand CreateCommand { get; }
         public ICommand CloseCommand { get; }
@@ -27,7 +41,8 @@ namespace ClickDoc.ViewModels.Entrepreneurs
             _serviceProvider = serviceProvider;
             _navigation = _serviceProvider.GetRequiredService<INavigationService>();
             _repository = _serviceProvider.GetRequiredService<IRepository<EntrepreneurEntity>>();
-            CreateCommand = new RelayCommand(CreateNew);
+            _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
+            CreateCommand = new AsyncRelayCommand(CreateNew);
             CloseCommand = new RelayCommand(Close);
         }
 
@@ -36,20 +51,33 @@ namespace ClickDoc.ViewModels.Entrepreneurs
             _navigation.CloseCurrentWindow();
         }
 
-        private void CreateNew()
+        private async Task CreateNew()
         {
-            _navigation.CloseCurrentWindow();
-
-            EntrepreneurEntity entity = new()
+            try
             {
-                Name = _name,
-                Surname = _surname,
-                Patronymic = _patronymic,
-                OGRNIP = _ogrnip,
-            };
-            _repository.Add(entity);
-
-            MessageBox.Show($"{entity.Surname} {entity.Name} добавлен(а) в БД");
+                IsButtonEnabled = false;
+                EntrepreneurEntity entity = new()
+                {
+                    Name = _name,
+                    Surname = _surname,
+                    Patronymic = _patronymic,
+                    OGRNIP = _ogrnip,
+                };
+                await _repository.Add(entity);
+                _notificationService.ShowSuccess($"{entity.Surname} {entity.Name} добавлен(а) в БД");
+                IsButtonEnabled = true;
+                _navigation.CloseCurrentWindow();
+            }
+            catch (DbUpdateException)
+            {
+                _notificationService.ShowError("Ошибка базы данных");
+                IsButtonEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(ex.Message);
+                IsButtonEnabled= true;
+            }
         }
 
         public string Surname

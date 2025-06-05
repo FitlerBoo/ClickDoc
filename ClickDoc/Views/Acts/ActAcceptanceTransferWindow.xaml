@@ -134,6 +134,7 @@
                 Content="Создать"
                 Width="120" Height="30"
                 FontSize="16"
+                IsEnabled="{Binding IsButtonEnabled}"
                 Command="{Binding CreateCommand}"/>
     </Grid>
 </Window>

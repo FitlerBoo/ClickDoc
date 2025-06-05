@@ -8,6 +8,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.IO.Packaging;
 using Microsoft.VisualBasic;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClickDoc.ViewModels.Contracts
 {
@@ -24,9 +25,11 @@ namespace ClickDoc.ViewModels.Contracts
         private ContractorEntity _contractor;
 
         private readonly IRepository<ContractEntity> _repository;
-
+        private readonly INotificationService _notificationService;
         private ObservableCollection<ContractorEntity> _contractors = [];
         private ObservableCollection<EntrepreneurEntity> _entrepreneurs = [];
+        private bool _isButtonEnabled = true;
+
         public ObservableCollection<ContractorEntity> Contractors
         {
             get => _contractors;
@@ -73,13 +76,23 @@ namespace ClickDoc.ViewModels.Contracts
                 OnPropertyChanged(nameof(Contractor));
             }
         }
+        public bool IsButtonEnabled
+        {
+            get => _isButtonEnabled;
+            set
+            {
+                _isButtonEnabled = value;
+                OnPropertyChanged(nameof(IsButtonEnabled));
+            }
+        }
 
         public NewContractVM(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _navigation = _serviceProvider.GetRequiredService<INavigationService>();
             _repository = _serviceProvider.GetRequiredService<IRepository<ContractEntity>>();
-            CreateCommand = new RelayCommand(CreateNew);
+            _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
+            CreateCommand = new AsyncRelayCommand(CreateNew);
             CloseCommand = new RelayCommand(Close);
 
             LoadDataAsync();
@@ -96,13 +109,21 @@ namespace ClickDoc.ViewModels.Contracts
         {
             var collection = new ObservableCollection<T>();
             var repository = _serviceProvider.GetRequiredService<IRepository<T>>();
-            var entities = await repository.GetAll();
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                collection.Clear();
-                foreach (var e in entities)
-                    collection.Add(e);
-            });
+                var entities = await repository.GetAll();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    collection.Clear();
+                    foreach (var e in entities)
+                        collection.Add(e);
+                });
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(
+                    $"Ошибка загрузки элементов из базы данных\n{ex.Message}");
+            }
             return collection;
         }
 
@@ -111,9 +132,9 @@ namespace ClickDoc.ViewModels.Contracts
             _navigation.CloseCurrentWindow();
         }
 
-        private void CreateNew()
+        private async Task CreateNew()
         {
-            _navigation.CloseCurrentWindow();
+            IsButtonEnabled = false;
 
             if (_contractNumber[0] == '№')
                 _contractNumber = _contractNumber.Remove(0,1);
@@ -124,9 +145,23 @@ namespace ClickDoc.ViewModels.Contracts
                 EntrepreneurId = _entrepreneur.Id,
                 ContractorId = _contractor.Id
             };
-
-            _repository.Add(entity);
-            MessageBox.Show($"{entity.ContractNumber} добавлен в БД");
+            try
+            {
+                await _repository.Add(entity);
+                _notificationService.ShowSuccess($"{entity.ContractNumber} добавлен в БД");
+                IsButtonEnabled = true;
+                _navigation.CloseCurrentWindow();
+            }
+            catch (DbUpdateException)
+            {
+                _notificationService.ShowError("Ошибка базы данных");
+                IsButtonEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(ex.Message);
+                IsButtonEnabled = true;
+            }
         }
     }
 }

@@ -15,12 +15,12 @@ namespace ClickDoc.ViewModels.Contractors
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
         private readonly IRepository<ContractorEntity> _repository;
+        private readonly INotificationService _notificationService;
         private ObservableCollection<ContractorEntity> _contractors = [];
         private ContractorEntity _selectedItem;
 
         public ICommand CreateNewCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
-        public ICommand BackCommand { get; private set; }
         public ObservableCollection<ContractorEntity> Contractors => _contractors;
         public bool IsItemSelected => SelectedItem != null;
 
@@ -40,6 +40,7 @@ namespace ClickDoc.ViewModels.Contractors
             _serviceProvider = serviceProvider;
             _navigationService = _serviceProvider.GetRequiredService<INavigationService>();
             _repository = _serviceProvider.GetRequiredService<IRepository<ContractorEntity>>();
+            _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
             _repository.ItemAdded += OnItemAdded;
             _repository.ItemRemoved += OnItemRemoved;
 
@@ -50,31 +51,40 @@ namespace ClickDoc.ViewModels.Contractors
         private void InitializeCommands()
         {
             CreateNewCommand = new RelayCommand(CreateNew);
-            DeleteCommand = new RelayCommand(Delete);
-            BackCommand = new RelayCommand(BackToMenu);
+            DeleteCommand = new AsyncRelayCommand(Delete);
         }
 
         private async Task LoadDataAsync()
         {
-            var contractors = await _repository.GetAll();
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Contractors.Clear();
-                foreach (var e in contractors)
-                    Contractors.Add(e);
-            });
+                var contractors = await _repository.GetAll();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Contractors.Clear();
+                    foreach (var e in contractors)
+                        Contractors.Add(e);
+                });
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(
+                    $"Ошибка загрузки элементов из базы данных:\n{ex.Message}");
+            }
         }
 
-        private void BackToMenu()
-        {
-            _navigationService.NavigateTo<MainMenuWindow>();
-        }
-
-        private void Delete()
+        private async Task Delete()
         {
             var contractor = SelectedItem;
-            _repository.Delete(SelectedItem.Id);
-            MessageBox.Show($"{contractor.Surname} {contractor.Name} удален(а) из БД");
+            try
+            {
+                await _repository.Delete(SelectedItem.Id);
+                _notificationService.ShowSuccess($"{contractor.FullName} удален(а) из БД");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"Ошибка удаления из базы данных:\n{ex.Message}");
+            }
         }
 
         private void CreateNew()
@@ -90,7 +100,7 @@ namespace ClickDoc.ViewModels.Contractors
 
         private void OnItemAdded(ContractorEntity entity)
         {
-            Application.Current.Dispatcher.Invoke(() => Contractors.Add(entity));
+            Application.Current.Dispatcher.Invoke(() =>Contractors.Add(entity));
         }
     }
 }

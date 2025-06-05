@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Input;
 using System.Windows;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClickDoc.ViewModels.Contractors
 {
@@ -14,10 +15,11 @@ namespace ClickDoc.ViewModels.Contractors
         private string _name = string.Empty;
         private string _patronymic = string.Empty;
         private string _inn = string.Empty;
-
+        private bool _isButtonEnabled = true;
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigation;
         private readonly IRepository<ContractorEntity> _repository;
+        private readonly INotificationService _notificationService;
 
         public ICommand CreateCommand { get; }
         public ICommand CloseCommand { get; }
@@ -27,7 +29,8 @@ namespace ClickDoc.ViewModels.Contractors
             _serviceProvider = serviceProvider;
             _navigation = _serviceProvider.GetRequiredService<INavigationService>();
             _repository = _serviceProvider.GetRequiredService<IRepository<ContractorEntity>>();
-            CreateCommand = new RelayCommand(CreateNew);
+            _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
+            CreateCommand = new AsyncRelayCommand(CreateNew);
             CloseCommand = new RelayCommand(Close);
         }
 
@@ -36,10 +39,9 @@ namespace ClickDoc.ViewModels.Contractors
             _navigation.CloseCurrentWindow();
         }
 
-        private void CreateNew()
+        private async Task CreateNew()
         {
-            _navigation.CloseCurrentWindow();
-
+            IsButtonEnabled = false;
             ContractorEntity entity = new()
             {
                 Name = this.Name,
@@ -47,11 +49,33 @@ namespace ClickDoc.ViewModels.Contractors
                 Patronymic = this.Patronymic,
                 Inn = this.INN
             };
-            _repository.Add(entity);
-
-            MessageBox.Show($"{entity.Surname} {entity.Name} добавлен(а) в БД");
+            try
+            {
+                await _repository.Add(entity);
+                _notificationService.ShowSuccess($"{entity.FullName} добавлен в БД");
+                IsButtonEnabled = true;
+                _navigation.CloseCurrentWindow();
+            }
+            catch (DbUpdateException)
+            {
+                _notificationService.ShowError("Ошибка базы данных");
+                IsButtonEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(ex.Message);
+                IsButtonEnabled = true;
+            }
         }
-
+        public bool IsButtonEnabled
+        {
+            get => _isButtonEnabled;
+            set
+            {
+                _isButtonEnabled = value;
+                OnPropertyChanged(nameof(IsButtonEnabled));
+            }
+        }
         public string Surname
         {
             get => _surname;
