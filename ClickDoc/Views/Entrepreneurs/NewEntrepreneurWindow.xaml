@@ -7,7 +7,8 @@
         xmlns:vm="clr-namespace:ClickDoc.ViewModels.Entrepreneurs"
         d:DataContext="{d:DesignInstance vm:NewEntrepreneurVM}"
         mc:Ignorable="d"
-        Title="ClickDoc" Height="350" Width="450">
+        Title="ClickDoc" Height="470" Width="450">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="130"/>
@@ -15,11 +16,15 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Label Style="{StaticResource LabelBaseStyle}"
@@ -29,25 +34,45 @@
                HorizontalContentAlignment="Center"/>
 
         <TextBlock Text="Фамилия:" Grid.Row="1" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Имя:" Grid.Row="2" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Отчество:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Номер ОГРНИП:" Grid.Row="4" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Имя:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Отчество:" Grid.Row="5" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Номер ОГРНИП:" Grid.Row="7" Style="{StaticResource BaseTextBlock}"/>
+        
+        <TextBox Grid.Column="1" Grid.Row="1"
+                 x:Name="SurnameTB"
+                 Style="{StaticResource FormTextBox}"
+                 Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <TextBox Grid.Column="1" Grid.Row="3"
+                 x:Name="NameTB"
+                 Style="{StaticResource FormTextBox}"
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <TextBox Grid.Column="1" Grid.Row="5"
+                 x:Name="PatronymicTB"
+                 Style="{StaticResource FormTextBox}"
+                 Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <TextBox Grid.Column="1" Grid.Row="7"
+                 x:Name="OGRNIP_TB"
+                 Style="{StaticResource FormTextBox}"
+                 Text="{Binding OGRNIP, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
 
-        <TextBox
-            Grid.Column="1" Grid.Row="1"
-            Style="{StaticResource FormTextBox}"
-            Text="{Binding Surname}"/>
-        <TextBox Grid.Column="1" Grid.Row="2"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding Name}"/>
-        <TextBox Grid.Column="1" Grid.Row="3" 
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding Patronymic}"/>
-        <TextBox Grid.Column="1" Grid.Row="4"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding OGRNIP}"/>
+        <Label Grid.Column="1" Grid.Row="2"
+               Style="{StaticResource LabelError}"
+               Content="{Binding ElementName=SurnameTB, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <Label Grid.Column="1" Grid.Row="4"
+               Style="{StaticResource LabelError}"
+               Content="{Binding ElementName=NameTB, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <Label Grid.Column="1" Grid.Row="6"
+               Style="{StaticResource LabelError}"
+               Content="{Binding ElementName=PatronymicTB, Path=(Validation.Errors)[0].ErrorContent}"/>
+        <Label Grid.Column="1" Grid.Row="8"
+               Style="{StaticResource LabelError}"
+               Content="{Binding ElementName=OGRNIP_TB, Path=(Validation.Errors)[0].ErrorContent}"/>
 
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button
                 Width="120" Height="40"
                 Margin="20, 0, 20 , 0"
@@ -57,9 +82,9 @@
 
             <Button Command="{Binding CreateCommand}"
                     Width="120" Height="40"
-                    Margin="20, 0, 20 , 0">
-                <TextBlock Text="Добавить"
-                           IsEnabled="{Binding IsButtonEnabled}"/>
+                    Margin="20, 0, 20 , 0"
+                    IsEnabled="{Binding IsButtonEnabled, UpdateSourceTrigger=PropertyChanged}">
+                <TextBlock Text="Добавить"/>
             </Button>
         </StackPanel>
     </Grid>

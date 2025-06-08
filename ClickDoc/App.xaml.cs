@@ -73,7 +73,6 @@ namespace ClickDoc
             services.AddTransient<INotificationService, NotificationService>();
 
             services.AddTransient<IGeneratorFactory, GeneratorFactory>();
-
         }
     }
 

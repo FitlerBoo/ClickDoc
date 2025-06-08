@@ -1,5 +1,4 @@
 ﻿using ClickDoc.Models;
-using ClickDoc.Utils;
 
 namespace ClickDoc.Generators
 {

@@ -1,7 +1,6 @@
 ﻿using ClickDoc.Models;
 using ClickDoc.Utils;
 using Spire.Doc;
-using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 
 namespace ClickDoc.Generators

@@ -1,12 +1,12 @@
 ﻿using ClickDoc.Database.Entities;
 using ClickDoc.Database.Repositories;
 using ClickDoc.Utils;
+using ClickDoc.Views.Contractors;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using System.Windows;
-using ClickDoc.Views.Contractors;
+using System.Windows.Input;
 
 namespace ClickDoc.ViewModels.Contractors
 {
@@ -100,7 +100,7 @@ namespace ClickDoc.ViewModels.Contractors
 
         private void OnItemAdded(ContractorEntity entity)
         {
-            Application.Current.Dispatcher.Invoke(() =>Contractors.Add(entity));
+            Application.Current.Dispatcher.Invoke(() => Contractors.Add(entity));
         }
     }
 }

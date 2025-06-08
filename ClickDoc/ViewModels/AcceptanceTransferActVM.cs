@@ -6,37 +6,31 @@ using ClickDoc.Utils;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveValidation;
+using ReactiveValidation.Extensions;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ClickDoc.ViewModels
 {
-    public class AcceptanceTransferActVM : ViewModelBase
+    public class AcceptanceTransferActVM : ValidatableObject
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
         private readonly IRepository<ContractEntity> _repository;
         private readonly INotificationService _notificationService;
         private IGeneratorFactory _generatorFactory;
+
         private ObservableCollection<ContractEntity> _contracts = [];
-        private bool _isButtonEnabled = true;
-        private DocumentGeneratorType _selectedGeneratorType = DocumentGeneratorType.Word;
         public ObservableCollection<ContractEntity> Contracts
         {
             get => _contracts;
-            set
-            {
-                _contracts = value;
-                OnPropertyChanged(nameof(Contracts));
-            }
+            set => SetAndRaiseIfChanged(ref _contracts, value);
         }
-        private ContractEntity _selectedItem;
-
-        private FormData _formData;
-        private string _filename = "Акт приема-передачи оказанных услуг";
+        
         public ICommand CreateCommand { get; }
         public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
@@ -45,14 +39,22 @@ namespace ClickDoc.ViewModels
             _repository = serviceProvider.GetRequiredService<IRepository<ContractEntity>>();
             _notificationService = serviceProvider.GetRequiredService<INotificationService>();
             _generatorFactory = serviceProvider.GetRequiredService<IGeneratorFactory>();
+
             _repository.ItemAdded += OnItemAdded;
             _repository.ItemRemoved += OnItemRemoved;
-            _formData = _serviceProvider.GetRequiredService<FormData>();
-            CreateCommand = new AsyncRelayCommand(CreateDocument);
+
+            Validator = GetValidator();
+            PropertyChanged += (s, e) => UpdateButtonState();
 
             LoadDataAsync();
+
+            CreateCommand = new AsyncRelayCommand(Create);
         }
 
+        private void UpdateButtonState()
+        {
+            IsButtonEnabled = Validator?.IsValid ?? false;
+        }
         private async Task LoadDataAsync()
         {
             try
@@ -71,41 +73,156 @@ namespace ClickDoc.ViewModels
                     $"Ошибка загрузки элементов из базы данных\n{ex.Message}");
             }
         }
+        private async Task Create()
+        {
+            if (Validator.IsValid)
+            {
+                FormData formData;
+                try
+                {
+                    formData = GetFormData();
+                }
+                catch
+                {
+                    _notificationService.ShowError("Заполните форму правильно");
+                    return;
+                }
+                var contractData = new AcceptanceTransferActContractData(formData);
+                try
+                {
+                    IsButtonEnabled = false;
+                    var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    var generator = Generator;
+                    var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
+                    await generator.GenerateAsync(contractData,
+                    templatePath, _filename);
+                    _notificationService.ShowSuccess($"Файл {FileName} успешно создан на рабочем столе");
+                    IsButtonEnabled = true;
+                    _navigationService.CloseCurrentWindow();
+                }
+                catch (Exception ex)
+                {
+                    IsButtonEnabled = true;
+                    _notificationService.ShowError($"Ошибка пути к шаблону:\n{ex.Message}");
+                }
+            }
+            else
+                _notificationService.ShowError("Заполните форму");
+        }
 
-        #region Properties
-        public bool IsButtonEnabled
-        {
-            get => _isButtonEnabled;
-            set
+        private FormData GetFormData()
+            => new()
             {
-                _isButtonEnabled = value;
-                OnPropertyChanged(nameof(IsButtonEnabled));
-            }
-        }
-        public ContractEntity SelectedItem
+                ActNumber = ActNumber,
+                ActDate = ActDate,
+                EntrepreneurFullName = SelectedItem.Entrepreneur.FullName,
+                OGRNIP = SelectedItem.Entrepreneur.OGRNIP,
+                ContractorFullName = SelectedItem.Contractor.FullName,
+                ContractorINN = SelectedItem.Contractor.Inn,
+                ContractNumber = SelectedItem.ContractNumber,
+                ContractDate = ContractDate,
+                PeriodStart = PeriodStart,
+                PeriodEnd = PeriodEnd,
+                ServiceTypeDescription = ServiceTypeDescription,
+                UnitCost = decimal.Parse(UnitCost),
+                UnitCount = int.Parse(UnitCount),
+                InvoiceNumber = InvoiceNumber,
+                InvoiceDate = InvoiceDate,
+                SingingDate = SingingDate
+            };
+
+        #region Validation
+        private IObjectValidator? GetValidator()
         {
-            get => _selectedItem;
-            set
-            {
-                _selectedItem = value;
-                UpdateFormData();
-                OnPropertyChanged(nameof(SelectedItem));
-            }
+            var builder = new ValidationBuilder<AcceptanceTransferActVM>();
+
+            builder.RuleFor(a => a.SelectedItem)
+                .NotNull()
+                    .WithMessage("Выберите договор");
+
+            builder.RuleFor(a => a.ActNumber)
+                .NotEmpty()
+                    .WithMessage("Заполните поле")
+                .MaxLength(100)
+                    .WithMessage("Максимальное количество символов 100");
+
+            builder.RuleFor(a => a.ActDate)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.ContractDate)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.PeriodStart)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.PeriodEnd)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.ServiceTypeDescription)
+                .NotEmpty()
+                    .WithMessage("Заполните поле");
+
+            builder.RuleFor(a => a.UnitCost)
+                .NotNull()
+                    .WithMessage("Заполните поле")
+                .Matches(@"^[0-9]+([.,][0-9]+)?$")
+                    .WithMessage("Допустимы только цифры, точка или запятая")
+                .Must(BeGreaterThanZero)
+                    .WithMessage("Число должно быть больше 0");
+
+            builder.RuleFor(a => a.UnitCount)
+                .NotEmpty()
+                    .WithMessage("Заполните поле")
+                .Matches(@"^\d+$")
+                    .WithMessage("Используйте только числа")
+                .Must(BeGreaterThanZero)
+                    .WithMessage("Число должно быть больше 0");
+
+            builder.RuleFor(a => a.InvoiceNumber)
+                .NotEmpty()
+                    .WithMessage("Заполните поле")
+                .MaxLength(100)
+                    .WithMessage("Максимальное количество символов 100")
+                .Matches(@"^\d+$")
+                    .WithMessage("Используйте только цифры");
+
+            builder.RuleFor(a => a.InvoiceDate)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.SingingDate)
+                .NotNull()
+                    .WithMessage("Выберите дату");
+
+            builder.RuleFor(a => a.FileName)
+                .NotEmpty()
+                    .WithMessage("Заполните поле")
+                .MaxLength(100)
+                    .WithMessage("Максимальное количество символов 100");
+
+            return builder.Build(this);
         }
 
-        private void UpdateFormData()
+        private bool BeGreaterThanZero(string value)
         {
-            if (_selectedItem != null)
-            {
-                _formData.EntrepreneurFullName = _selectedItem.Entrepreneur?.FullName ?? string.Empty;
-                _formData.OGRNIP = _selectedItem.Entrepreneur?.OGRNIP ?? string.Empty;
-                _formData.ContractorFullName = _selectedItem.Contractor?.FullName ?? string.Empty;
-                _formData.ContractorINN = _selectedItem.Contractor?.Inn ?? string.Empty;
-                _formData.ContractNumber = _selectedItem.ContractNumber;
-            }
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            var normalizedValue = value.Replace(',', '.');
+
+            return decimal.TryParse(normalizedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result)
+                   && result >= 0;
         }
+
+        #endregion
 
         #region Generator
+
+        private DocumentGeneratorType _selectedGeneratorType = DocumentGeneratorType.Word;
         public DocumentGeneratorType SelectedGeneratorType
         {
             get => _selectedGeneratorType;
@@ -125,148 +242,107 @@ namespace ClickDoc.ViewModels
 
         #endregion
 
-        public decimal UnitCost
-        {
-            get => _formData.UnitCost;
-            set
-            {
-                _formData.UnitCost = value;
-                OnPropertyChanged(nameof(UnitCost));
-            }
-        }
+        #region Properties
 
-        public decimal UnitCount
+        private bool _isButtonEnabled;
+        private string _actNumber = string.Empty;
+        private ContractEntity _selectedItem;
+        private DateTime _actDate = DateTime.Now;
+        private DateTime _contractDate = DateTime.Now;
+        private DateTime _periodStart = DateTime.Now;
+        private DateTime _periodEnd = DateTime.Now;
+        private string _serviceTypeDescription;
+        private string _unitCost = string.Empty;
+        private string _unitCount = "1";
+        private string _invoiceNumber = string.Empty;
+        private DateTime _invoiceDate = DateTime.Now;
+        private DateTime _singingDate = DateTime.Now;
+        private string _filename = "Акт приема-передачи оказанных услуг";
+        public bool IsButtonEnabled
         {
-            get => _formData.UnitCount;
-            set
-            {
-                _formData.UnitCount = value;
-                OnPropertyChanged(nameof(UnitCount));
-            }
+            get => _isButtonEnabled;
+            set => SetAndRaiseIfChanged(ref _isButtonEnabled, value);
         }
 
         public string ActNumber
         {
-            get => _formData.ActNumber;
-            set
-            {
-                _formData.ActNumber = value;
-                OnPropertyChanged(nameof(ActNumber));
-            }
+            get => _actNumber;
+            set => SetAndRaiseIfChanged(ref  _actNumber, value);
         }
 
-        public string ServiceTypeDescription
+        public ContractEntity SelectedItem
         {
-            get => _formData.ServiceTypeDescription;
-            set
-            {
-                _formData.ServiceTypeDescription = value;
-                OnPropertyChanged(nameof(ServiceTypeDescription));
-            }
-        }
-
-        public string InvoiceNumber
-        {
-            get => _formData.InvoiceNumber;
-            set
-            {
-                _formData.InvoiceNumber = value;
-                OnPropertyChanged(nameof(InvoiceNumber));
-            }
+            get => _selectedItem;
+            set => SetAndRaiseIfChanged(ref _selectedItem, value);
         }
 
         public DateTime ActDate
         {
-            get => _formData.ActDate;
-            set
-            {
-                _formData.ActDate = value;
-                OnPropertyChanged(nameof(ActDate));
-            }
+            get => _actDate;
+            set => SetAndRaiseIfChanged(ref _actDate, value);
         }
 
         public DateTime ContractDate
         {
-            get => _formData.ContractDate;
-            set
-            {
-                _formData.ContractDate = value;
-                OnPropertyChanged(nameof(ContractDate));
-            }
+            get => _contractDate;
+            set => SetAndRaiseIfChanged(ref _contractDate, value);
         }
 
         public DateTime PeriodStart
         {
-            get => _formData.PeriodStart;
-            set
-            {
-                _formData.PeriodStart = value;
-                OnPropertyChanged(nameof(PeriodStart));
-            }
+            get => _periodStart;
+            set => SetAndRaiseIfChanged(ref _periodStart, value);
         }
 
         public DateTime PeriodEnd
         {
-            get => _formData.PeriodEnd;
-            set
-            {
-                _formData.PeriodEnd = value;
-                OnPropertyChanged(nameof(PeriodEnd));
-            }
+            get => _periodEnd;
+            set => SetAndRaiseIfChanged(ref _periodEnd, value);
+        }
+
+        public string ServiceTypeDescription
+        {
+            get => _serviceTypeDescription;
+            set => SetAndRaiseIfChanged(ref _serviceTypeDescription, value);
+        }
+
+        public string UnitCost
+        {
+            get => _unitCost;
+            set => SetAndRaiseIfChanged(ref _unitCost, value);
+        }
+
+        public string UnitCount
+        {
+            get => _unitCount;
+            set => SetAndRaiseIfChanged(ref _unitCount, value);
+        }
+
+        public string InvoiceNumber
+        {
+            get => _invoiceNumber;
+            set => SetAndRaiseIfChanged(ref _invoiceNumber, value);
         }
 
         public DateTime InvoiceDate
         {
-            get => _formData.InvoiceDate;
-            set
-            {
-                _formData.InvoiceDate = value;
-                OnPropertyChanged(nameof(InvoiceDate));
-            }
+            get => _invoiceDate;
+            set => SetAndRaiseIfChanged(ref _invoiceDate, value);
         }
 
-        public DateTime LastDate
+        public DateTime SingingDate
         {
-            get => _formData.LastDate;
-            set
-            {
-                _formData.LastDate = value;
-                OnPropertyChanged(nameof(LastDate));
-            }
+            get => _singingDate;
+            set => SetAndRaiseIfChanged(ref _singingDate, value);
         }
 
         public string FileName
         {
             get => _filename;
-            set
-            {
-                _filename = value;
-                OnPropertyChanged(nameof(FileName));
-            }
+            set => SetAndRaiseIfChanged(ref  _filename, value);
         }
-        #endregion
 
-        private async Task CreateDocument()
-        {
-            var contractData = new AcceptanceTransferActContractData(_formData);
-            try
-            {
-                IsButtonEnabled = false;
-                var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                var generator = Generator;
-                var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
-                await generator.GenerateAsync(contractData,
-                templatePath, _filename);
-                _notificationService.ShowSuccess($"Файл {FileName} успешно создан на рабочем столе");
-                IsButtonEnabled = true;
-                _navigationService.CloseCurrentWindow();
-            }
-            catch (Exception ex)
-            {
-                IsButtonEnabled = true;
-                _notificationService.ShowError($"Ошибка пути к шаблону:\n{ex.Message}");
-            }
-        }
+        #endregion
 
         private void OnItemRemoved(ContractEntity entity)
         {

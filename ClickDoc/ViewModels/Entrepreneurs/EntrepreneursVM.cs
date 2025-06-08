@@ -16,6 +16,7 @@ namespace ClickDoc.ViewModels.Entrepreneurs
         private readonly INavigationService _navigationService;
         private readonly INotificationService _notificationService;
         private readonly IRepository<EntrepreneurEntity> _repository;
+
         private ObservableCollection<EntrepreneurEntity> _entrepreneurs = [];
         private EntrepreneurEntity _selectedItem;
 
@@ -70,7 +71,7 @@ namespace ClickDoc.ViewModels.Entrepreneurs
             {
                 _notificationService.ShowError(ex.Message);
             }
-            
+
         }
 
         private async Task Delete()

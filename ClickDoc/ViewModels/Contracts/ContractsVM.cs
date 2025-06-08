@@ -65,7 +65,8 @@ namespace ClickDoc.ViewModels.Contracts
                     foreach (var e in contractors)
                         Contracts.Add(e);
                 });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _notificationService.ShowError(
                     $"Ошибка загрузки элементов из базы данных:\n{ex.Message}");

@@ -1,6 +1,4 @@
-﻿using ClickDoc.Database.Entities;
-
-namespace ClickDoc.Database.Repositories
+﻿namespace ClickDoc.Database.Repositories
 {
     interface IRepository<T> where T : class
     {
