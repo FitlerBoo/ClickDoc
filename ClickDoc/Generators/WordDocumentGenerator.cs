@@ -23,16 +23,32 @@ namespace ClickDoc.Generators
                         string value = contractData.GetFieldValue(field) ?? string.Empty;
                         doc.Replace(placeholder, value, false, true);
                     }
-                    var outputPath = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                        $"{filename}.docx");
+
+                    var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    var baseFileName = Path.Combine(desktopPath, filename);
+                    var outputPath = GetUniqueFileName(baseFileName, "docx");
                     doc.SaveToFile(outputPath, FileFormat.Docx2013);
+                    _notificationService.ShowSuccess($"Файл {filename} успешно создан на рабочем столе");
                 }
                 catch (Exception ex)
                 {
                     _notificationService.ShowError($"Ошибка формирования документа:\n{ex.Message}");
                 }
             });
+        }
+
+        private string GetUniqueFileName(string basePath, string extension)
+        {
+            var counter = 1;
+            var newPath = $"{basePath}.{extension}";
+
+            while (File.Exists(newPath))
+            {
+                newPath = $"{basePath} ({counter}).{extension}";
+                counter++;
+            }
+
+            return newPath;
         }
     }
 }

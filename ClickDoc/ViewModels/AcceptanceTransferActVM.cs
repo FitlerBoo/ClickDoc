@@ -10,7 +10,6 @@ using ReactiveValidation.Extensions;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
@@ -30,7 +29,7 @@ namespace ClickDoc.ViewModels
             get => _contracts;
             set => SetAndRaiseIfChanged(ref _contracts, value);
         }
-        
+
         public ICommand CreateCommand { get; }
         public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
@@ -94,9 +93,7 @@ namespace ClickDoc.ViewModels
                     var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
                     var generator = Generator;
                     var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
-                    await generator.GenerateAsync(contractData,
-                    templatePath, _filename);
-                    _notificationService.ShowSuccess($"Файл {FileName} успешно создан на рабочем столе");
+                    await generator.GenerateAsync(contractData, templatePath, _filename);
                     IsButtonEnabled = true;
                     _navigationService.CloseCurrentWindow();
                 }
@@ -178,7 +175,7 @@ namespace ClickDoc.ViewModels
                 .NotEmpty()
                     .WithMessage("Заполните поле")
                 .Matches(@"^\d+$")
-                    .WithMessage("Используйте только числа")
+                    .WithMessage("Используйте только цифры")
                 .Must(BeGreaterThanZero)
                     .WithMessage("Число должно быть больше 0");
 
@@ -209,9 +206,6 @@ namespace ClickDoc.ViewModels
 
         private bool BeGreaterThanZero(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                return false;
-
             var normalizedValue = value.Replace(',', '.');
 
             return decimal.TryParse(normalizedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result)
@@ -251,7 +245,7 @@ namespace ClickDoc.ViewModels
         private DateTime _contractDate = DateTime.Now;
         private DateTime _periodStart = DateTime.Now;
         private DateTime _periodEnd = DateTime.Now;
-        private string _serviceTypeDescription;
+        private string _serviceTypeDescription = string.Empty;
         private string _unitCost = string.Empty;
         private string _unitCount = "1";
         private string _invoiceNumber = string.Empty;
@@ -267,7 +261,7 @@ namespace ClickDoc.ViewModels
         public string ActNumber
         {
             get => _actNumber;
-            set => SetAndRaiseIfChanged(ref  _actNumber, value);
+            set => SetAndRaiseIfChanged(ref _actNumber, value);
         }
 
         public ContractEntity SelectedItem
@@ -339,7 +333,7 @@ namespace ClickDoc.ViewModels
         public string FileName
         {
             get => _filename;
-            set => SetAndRaiseIfChanged(ref  _filename, value);
+            set => SetAndRaiseIfChanged(ref _filename, value);
         }
 
         #endregion
