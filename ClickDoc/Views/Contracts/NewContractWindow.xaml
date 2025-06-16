@@ -15,13 +15,10 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
-            <RowDefinition/>
-            <RowDefinition Height="25"/>
-            <RowDefinition/>
-            <RowDefinition Height="25"/>
-            <RowDefinition/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
         <Label Style="{StaticResource LabelBaseStyle}"
@@ -31,44 +28,29 @@
                HorizontalContentAlignment="Center"/>
 
         <TextBlock Text="Номер контракта:" Grid.Row="1" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Предприниматель:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Исполнитель:" Grid.Row="5" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Предприниматель:" Grid.Row="2" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Исполнитель:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
 
         <TextBox Grid.Column="1" Grid.Row="1"
                   x:Name="NumberTB"
-                 Style="{StaticResource FormTextBox}"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
                  Text="{Binding ContractNumber, UpdateSourceTrigger=PropertyChanged}"/>
 
         <ComboBox ItemsSource="{Binding Entrepreneurs, UpdateSourceTrigger=PropertyChanged}"
                   SelectedItem="{Binding Entrepreneur, UpdateSourceTrigger=PropertyChanged}"
                   x:Name="EntrepreneursCB"
+                  Style="{StaticResource OnErrorTextBoxStyle}"
                   DisplayMemberPath="FullName"
-                  Grid.Column="1" Grid.Row="3"
-                  FontSize="16"
-                  Margin="5"/>
-        
+                  Grid.Column="1" Grid.Row="2"/>
+
         <ComboBox ItemsSource="{Binding Contractors, UpdateSourceTrigger=PropertyChanged}"
                   SelectedItem="{Binding Contractor, UpdateSourceTrigger=PropertyChanged}"
                   x:Name="ContractorsCB"
+                  Style="{StaticResource OnErrorTextBoxStyle}"
                   DisplayMemberPath="FullName"
-                  Grid.Column="1" Grid.Row="5"
-                  FontSize="16"
-                  Margin="5"/>
+                  Grid.Column="1" Grid.Row="3"/>
 
-        <Label Grid.Column="1" Grid.Row="2"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=NumberTB, Path=(Validation.Errors)[0].ErrorContent}"/>
-        
-        <Label Grid.Column="1" Grid.Row="4"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=EntrepreneursCB, Path=(Validation.Errors)[0].ErrorContent}"/>
-
-        <Label Grid.Column="1" Grid.Row="6"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=ContractorsCB, Path=(Validation.Errors)[0].ErrorContent}"/>
-
-
-        <StackPanel Grid.Row="7" Grid.ColumnSpan="2"
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2"
                     Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Command="{Binding CloseCommand}"
                     Width="120" Height="40"

@@ -16,15 +16,11 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
         <Label Style="{StaticResource LabelBaseStyle}"
@@ -34,43 +30,26 @@
                HorizontalContentAlignment="Center"/>
 
         <TextBlock Text="Фамилия:" Grid.Row="1" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Имя:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Отчество:" Grid.Row="5" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Номер ОГРНИП:" Grid.Row="7" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Имя:" Grid.Row="2" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Отчество:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Номер ОГРНИП:" Grid.Row="4" Style="{StaticResource BaseTextBlock}"/>
         
         <TextBox Grid.Column="1" Grid.Row="1"
                  x:Name="SurnameTB"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <TextBox Grid.Column="1" Grid.Row="3"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="2"
                  x:Name="NameTB"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <TextBox Grid.Column="1" Grid.Row="5"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="3"
                  x:Name="PatronymicTB"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <TextBox Grid.Column="1" Grid.Row="7"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="4"
                  x:Name="OGRNIP_TB"
-                 Style="{StaticResource FormTextBox}"
-                 Text="{Binding OGRNIP, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
-
-        <Label Grid.Column="1" Grid.Row="2"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=SurnameTB, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <Label Grid.Column="1" Grid.Row="4"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=NameTB, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <Label Grid.Column="1" Grid.Row="6"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=PatronymicTB, Path=(Validation.Errors)[0].ErrorContent}"/>
-        <Label Grid.Column="1" Grid.Row="8"
-               Style="{StaticResource LabelError}"
-               Content="{Binding ElementName=OGRNIP_TB, Path=(Validation.Errors)[0].ErrorContent}"/>
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding OGRNIP, UpdateSourceTrigger=PropertyChanged}"/>
 
         <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button
