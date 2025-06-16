@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:ClickDoc.ViewModels.Contracts"
         d:DataContext="{d:DesignInstance vm:NewContractVM}"
         mc:Ignorable="d"
-        Title="ClickDoc" Height="350" Width="450">
+        Title="ClickDoc" Height="450" Width="450">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="140"/>
@@ -15,6 +15,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -27,28 +28,34 @@
                Grid.ColumnSpan="2"
                HorizontalContentAlignment="Center"/>
 
-        <TextBlock Text="Номер контракта:" Grid.Row="1" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Предприниматель:" Grid.Row="2" Style="{StaticResource BaseTextBlock}"/>
-        <TextBlock Text="Исполнитель:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Номер договора:" Grid.Row="1" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Дата договора:" Grid.Row="2" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Предприниматель:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
+        <TextBlock Text="Исполнитель:" Grid.Row="4" Style="{StaticResource BaseTextBlock}"/>
 
         <TextBox Grid.Column="1" Grid.Row="1"
                   x:Name="NumberTB"
                  Style="{StaticResource OnErrorTextBoxStyle}"
                  Text="{Binding ContractNumber, UpdateSourceTrigger=PropertyChanged}"/>
 
+        <DatePicker Grid.Column="2" Grid.Row="2"
+                    Style="{StaticResource OnErrorTextBoxStyle}"
+                    x:Name="ActDateDP"
+                    SelectedDate="{Binding ContractDate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
         <ComboBox ItemsSource="{Binding Entrepreneurs, UpdateSourceTrigger=PropertyChanged}"
                   SelectedItem="{Binding Entrepreneur, UpdateSourceTrigger=PropertyChanged}"
                   x:Name="EntrepreneursCB"
                   Style="{StaticResource OnErrorTextBoxStyle}"
                   DisplayMemberPath="FullName"
-                  Grid.Column="1" Grid.Row="2"/>
+                  Grid.Column="1" Grid.Row="3"/>
 
         <ComboBox ItemsSource="{Binding Contractors, UpdateSourceTrigger=PropertyChanged}"
                   SelectedItem="{Binding Contractor, UpdateSourceTrigger=PropertyChanged}"
                   x:Name="ContractorsCB"
                   Style="{StaticResource OnErrorTextBoxStyle}"
                   DisplayMemberPath="FullName"
-                  Grid.Column="1" Grid.Row="3"/>
+                  Grid.Column="1" Grid.Row="4"/>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2"
                     Orientation="Horizontal" HorizontalAlignment="Center">

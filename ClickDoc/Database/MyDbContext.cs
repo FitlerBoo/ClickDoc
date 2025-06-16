@@ -9,6 +9,8 @@ namespace ClickDoc.Database
         public DbSet<EntrepreneurEntity> Entrepreneurs { get; set; }
         public DbSet<ContractorEntity> Contractors { get; set; }
         public DbSet<ContractEntity> Contracts { get; set; }
+        public MyDbContext()
+            => Database.EnsureCreated();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

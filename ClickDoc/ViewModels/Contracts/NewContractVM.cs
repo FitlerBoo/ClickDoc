@@ -21,6 +21,7 @@ namespace ClickDoc.ViewModels.Contracts
         public ICommand CloseCommand { get; }
 
         private string _contractNumber;
+        private DateTime _contractDate = DateTime.Now;
         private EntrepreneurEntity _entrepreneur;
         private ContractorEntity _contractor;
 
@@ -53,6 +54,11 @@ namespace ClickDoc.ViewModels.Contracts
         {
             get => _contractNumber;
             set => SetAndRaiseIfChanged(ref _contractNumber, value);
+        }
+        public DateTime ContractDate
+        {
+            get => _contractDate;
+            set => SetAndRaiseIfChanged(ref _contractDate, value);
         }
         public EntrepreneurEntity Entrepreneur
         {
@@ -109,6 +115,10 @@ namespace ClickDoc.ViewModels.Contracts
                     .WithMessage("Заполните поле")
                 .MaxLength(100)
                     .WithMessage("Максимальное количество символов 100");
+
+            builder.RuleFor(c => c.ContractDate)
+                .NotNull()
+                    .WithMessage("Заполните поле");
 
             builder.RuleFor(c => c.Entrepreneur)
                 .NotNull()
@@ -167,6 +177,7 @@ namespace ClickDoc.ViewModels.Contracts
                 ContractEntity entity = new()
                 {
                     ContractNumber = _contractNumber,
+                    ContractDate = DateFormatter.FormatShort(ContractDate),
                     EntrepreneurId = _entrepreneur.Id,
                     ContractorId = _contractor.Id
                 };

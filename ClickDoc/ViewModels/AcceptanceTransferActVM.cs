@@ -30,6 +30,7 @@ namespace ClickDoc.ViewModels
         }
 
         public ICommand CreateCommand { get; }
+
         public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
             _navigationService = serviceProvider.GetRequiredService<INavigationService>();
@@ -91,7 +92,7 @@ namespace ClickDoc.ViewModels
                     var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
                     var generator = Generator;
                     var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
-                    await generator.GenerateAsync(contractData, templatePath, _filename);
+                    await generator.GenerateAsync(contractData, templatePath, FileName);
                     IsButtonEnabled = true;
                     _navigationService.CloseCurrentWindow();
                 }
@@ -115,7 +116,7 @@ namespace ClickDoc.ViewModels
                 ContractorFullName = SelectedItem.Contractor.FullName,
                 ContractorINN = SelectedItem.Contractor.Inn,
                 ContractNumber = SelectedItem.ContractNumber,
-                ContractDate = ContractDate,
+                ContractDate = DateTime.Parse(SelectedItem.ContractDate),
                 PeriodStart = PeriodStart,
                 PeriodEnd = PeriodEnd,
                 ServiceTypeDescription = ServiceTypeDescription,
@@ -142,10 +143,6 @@ namespace ClickDoc.ViewModels
                     .WithMessage("Максимальное количество символов 100");
 
             builder.RuleFor(a => a.ActDate)
-                .NotNull()
-                    .WithMessage("Выберите дату");
-
-            builder.RuleFor(a => a.ContractDate)
                 .NotNull()
                     .WithMessage("Выберите дату");
 
@@ -240,7 +237,6 @@ namespace ClickDoc.ViewModels
         private string _actNumber = string.Empty;
         private ContractEntity _selectedItem;
         private DateTime _actDate = DateTime.Now;
-        private DateTime _contractDate = DateTime.Now;
         private DateTime _periodStart = DateTime.Now;
         private DateTime _periodEnd = DateTime.Now;
         private string _serviceTypeDescription = string.Empty;
@@ -249,7 +245,8 @@ namespace ClickDoc.ViewModels
         private string _invoiceNumber = string.Empty;
         private DateTime _invoiceDate = DateTime.Now;
         private DateTime _singingDate = DateTime.Now;
-        private string _filename = "Акт приема-передачи оказанных услуг";
+        private string _baseFilename = "Акт приема-передачи оказанных услуг";
+        private string _customFilename;
         public bool IsButtonEnabled
         {
             get => _isButtonEnabled;
@@ -259,7 +256,12 @@ namespace ClickDoc.ViewModels
         public string ActNumber
         {
             get => _actNumber;
-            set => SetAndRaiseIfChanged(ref _actNumber, value);
+            set
+            {
+                SetAndRaiseIfChanged(ref _actNumber, value);
+                _customFilename = null;
+                OnPropertyChanged(nameof(FileName));
+            }
         }
 
         public ContractEntity SelectedItem
@@ -271,13 +273,12 @@ namespace ClickDoc.ViewModels
         public DateTime ActDate
         {
             get => _actDate;
-            set => SetAndRaiseIfChanged(ref _actDate, value);
-        }
-
-        public DateTime ContractDate
-        {
-            get => _contractDate;
-            set => SetAndRaiseIfChanged(ref _contractDate, value);
+            set
+            {
+                SetAndRaiseIfChanged(ref _actDate, value);
+                _customFilename = null;
+                OnPropertyChanged(nameof(FileName));
+            }
         }
 
         public DateTime PeriodStart
@@ -330,9 +331,39 @@ namespace ClickDoc.ViewModels
 
         public string FileName
         {
-            get => _filename;
-            set => SetAndRaiseIfChanged(ref _filename, value);
+            get
+            {
+                if (!string.IsNullOrEmpty(_customFilename))
+                {
+                    // Проверяем, не совпадает ли текущее значение с автоматическим
+                    var autoName = GenerateAutoFilename();
+                    return _customFilename == autoName ? autoName : _customFilename;
+                }
+
+                return GenerateAutoFilename();
+            }
+            set
+            {
+                // Сохраняем пользовательское значение, только если оно отличается от автоматического
+                var autoName = GenerateAutoFilename();
+                _customFilename = value == autoName ? null : value;
+                OnPropertyChanged(nameof(FileName));
+            }
         }
+
+        private string GenerateAutoFilename()
+        {
+            var filename = _baseFilename;
+
+            if (!string.IsNullOrEmpty(ActNumber))
+                filename += $" №{ActNumber}";
+
+            if (ActDate != default)
+                filename += $" от {ActDate:dd.MM.yyyy}";
+
+            return filename;
+        }
+
 
         #endregion
 

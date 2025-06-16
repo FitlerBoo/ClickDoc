@@ -1,4 +1,6 @@
-﻿namespace ClickDoc.Database.Entities
+﻿using ClickDoc.Utils;
+
+namespace ClickDoc.Database.Entities
 {
     public class ContractorEntity : Entity
     {
@@ -7,6 +9,7 @@
         public string Patronymic { get; set; } = string.Empty;
         public string Inn { get; set; } = string.Empty;
         public string FullName => $"{Surname} {Name} {Patronymic}".Trim();
+        public string ShortName => $"{FullnameFormatter.GetInitials(FullName)}";
 
     }
 }
