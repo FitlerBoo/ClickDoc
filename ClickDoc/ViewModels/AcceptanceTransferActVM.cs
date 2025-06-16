@@ -17,7 +17,6 @@ namespace ClickDoc.ViewModels
 {
     public class AcceptanceTransferActVM : ValidatableObject
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
         private readonly IRepository<ContractEntity> _repository;
         private readonly INotificationService _notificationService;
@@ -33,7 +32,6 @@ namespace ClickDoc.ViewModels
         public ICommand CreateCommand { get; }
         public AcceptanceTransferActVM(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;
             _navigationService = serviceProvider.GetRequiredService<INavigationService>();
             _repository = serviceProvider.GetRequiredService<IRepository<ContractEntity>>();
             _notificationService = serviceProvider.GetRequiredService<INotificationService>();
