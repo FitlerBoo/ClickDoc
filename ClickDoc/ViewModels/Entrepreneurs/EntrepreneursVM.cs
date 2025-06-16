@@ -14,13 +14,14 @@ namespace ClickDoc.ViewModels.Entrepreneurs
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
+        private readonly INotificationService _notificationService;
         private readonly IRepository<EntrepreneurEntity> _repository;
+
         private ObservableCollection<EntrepreneurEntity> _entrepreneurs = [];
         private EntrepreneurEntity _selectedItem;
 
         public ICommand CreateNewCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
-        public ICommand BackCommand { get; private set; }
         public ObservableCollection<EntrepreneurEntity> Entrepreneurs => _entrepreneurs;
         public bool IsItemSelected => SelectedItem != null;
 
@@ -39,6 +40,7 @@ namespace ClickDoc.ViewModels.Entrepreneurs
         {
             _serviceProvider = serviceProvider;
             _navigationService = _serviceProvider.GetRequiredService<INavigationService>();
+            _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
             _repository = _serviceProvider.GetRequiredService<IRepository<EntrepreneurEntity>>();
             _repository.ItemAdded += OnItemAdded;
             _repository.ItemRemoved += OnItemRemoved;
@@ -50,31 +52,40 @@ namespace ClickDoc.ViewModels.Entrepreneurs
         private void InitializeCommands()
         {
             CreateNewCommand = new RelayCommand(CreateNew);
-            DeleteCommand = new RelayCommand(Delete);
-            BackCommand = new RelayCommand(BackToMenu);
+            DeleteCommand = new AsyncRelayCommand(Delete);
         }
 
         private async Task LoadDataAsync()
         {
-            var entrepreneurs = await _repository.GetAll();
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Entrepreneurs.Clear();
-                foreach (var e in entrepreneurs)
-                    Entrepreneurs.Add(e);
-            });
+                var entrepreneurs = await _repository.GetAll();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Entrepreneurs.Clear();
+                    foreach (var e in entrepreneurs)
+                        Entrepreneurs.Add(e);
+                });
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(ex.Message);
+            }
+
         }
 
-        private void BackToMenu()
+        private async Task Delete()
         {
-            _navigationService.NavigateTo<MainMenuWindow>();
-        }
-
-        private void Delete()
-        {
-            var entrepreneur = SelectedItem;
-            _repository.Delete(SelectedItem.Id);
-            MessageBox.Show($"{entrepreneur.Surname} {entrepreneur.Name} удален(а) из БД");
+            try
+            {
+                var entrepreneur = SelectedItem;
+                await _repository.Delete(SelectedItem.Id);
+                _notificationService.ShowSuccess($"{entrepreneur.Surname} {entrepreneur.Name} удален(а) из БД");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError(ex.Message);
+            }
         }
 
         private void CreateNew()

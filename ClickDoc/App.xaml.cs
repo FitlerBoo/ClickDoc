@@ -1,6 +1,7 @@
 ﻿using ClickDoc.Database;
 using ClickDoc.Database.Entities;
 using ClickDoc.Database.Repositories;
+using ClickDoc.Generators;
 using ClickDoc.Models;
 using ClickDoc.Utils;
 using ClickDoc.ViewModels;
@@ -69,6 +70,9 @@ namespace ClickDoc
             services.AddSingleton<IRepository<ContractorEntity>, ContractorsRepository>();
             services.AddSingleton<IRepository<ContractEntity>, ContractsRepository>();
 
+            services.AddTransient<INotificationService, NotificationService>();
+
+            services.AddTransient<IGeneratorFactory, GeneratorFactory>();
         }
     }
 

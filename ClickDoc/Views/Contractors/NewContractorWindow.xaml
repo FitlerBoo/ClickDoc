@@ -7,7 +7,8 @@
         xmlns:vm="clr-namespace:ClickDoc.ViewModels.Contractors"
         d:DataContext="{d:DesignInstance vm:NewContractorVM}"
         mc:Ignorable="d"
-        Title="ClickDoc" Height="350" Width="450">
+            Title="ClickDoc" Height="470" Width="450">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="130"/>
@@ -15,11 +16,11 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
         <Label Style="{StaticResource LabelBaseStyle}"
@@ -33,31 +34,34 @@
         <TextBlock Text="Отчество:" Grid.Row="3" Style="{StaticResource BaseTextBlock}"/>
         <TextBlock Text="ИНН:" Grid.Row="4" Style="{StaticResource BaseTextBlock}"/>
 
-        <TextBox
-            Grid.Column="1" Grid.Row="1"
-            Style="{StaticResource FormTextBox}"
-            Text="{Binding Surname}"/>
-        <TextBox Grid.Column="1" Grid.Row="2"
-             Style="{StaticResource FormTextBox}"
-             Text="{Binding Name}"/>
-        <TextBox Grid.Column="1" Grid.Row="3" 
-             Style="{StaticResource FormTextBox}"
-             Text="{Binding Patronymic}"/>
-        <TextBox Grid.Column="1" Grid.Row="4"
-             Style="{StaticResource FormTextBox}"
-             Text="{Binding INN}"/>
+        <TextBox x:Name="SurnameTB"
+                 Grid.Column="1" Grid.Row="1"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+        <TextBox x:Name="NameTB"
+                 Grid.Column="1" Grid.Row="2"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+        <TextBox x:Name="PatronymicTB"
+                 Grid.Column="1" Grid.Row="3" 
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+        <TextBox x:Name="INN_TB"
+                 Grid.Column="1" Grid.Row="4"
+                 Style="{StaticResource OnErrorTextBoxStyle}"
+                 Text="{Binding INN, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button
-            Width="120" Height="40"
-            Margin="20, 0, 20 , 0"
-            Command="{Binding CloseCommand}">
+            <Button Width="120" Height="40"
+                    Margin="20, 0, 20 , 0"
+                    Command="{Binding CloseCommand}">
                 <TextBlock Text="Отмена"/>
             </Button>
 
             <Button Command="{Binding CreateCommand}"
-                Width="120" Height="40"
-                Margin="20, 0, 20 , 0">
+                    Width="120" Height="40"
+                    Margin="20, 0, 20 , 0"
+                    IsEnabled="{Binding IsButtonEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 <TextBlock Text="Добавить" />
             </Button>
         </StackPanel>

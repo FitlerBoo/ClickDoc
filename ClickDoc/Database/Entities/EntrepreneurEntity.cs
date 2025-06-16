@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ClickDoc.Database.Entities
+﻿namespace ClickDoc.Database.Entities
 {
     public class EntrepreneurEntity : Entity
     {

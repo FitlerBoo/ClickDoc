@@ -25,6 +25,6 @@
         public string InvoiceNumber { get; set; } = string.Empty; // 12
         public DateTime InvoiceDate { get; set; } = DateTime.Now; // 13
 
-        public DateTime LastDate { get; set; } = DateTime.Now; // 14
+        public DateTime SingingDate { get; set; } = DateTime.Now; // 14
     }
 }

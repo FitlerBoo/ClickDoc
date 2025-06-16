@@ -12,19 +12,6 @@ namespace ClickDoc.Models
 
         public IEnumerable<string> GetFieldNames() => _fields.Keys;
 
-        public bool Validate(out IEnumerable<string> errors)
-        {
-            var errs = new List<string>();
-
-            if (string.IsNullOrEmpty(_fields["ActNumber"]))
-                errs.Add("Номер акта обязателен");
-
-            // Другие проверки...
-
-            errors = errs;
-            return !errs.Any();
-        }
-
         private static Dictionary<string, string> ConvertFormData(FormData data)
         {
             return new()
@@ -55,7 +42,7 @@ namespace ClickDoc.Models
 
                 ["PriceInText"] = CostFormatter.CostToWordsFormat(data.UnitCount * data.UnitCost),
 
-                ["LastDate"] = DateFormatter.FormatShort(data.LastDate),
+                ["LastDate"] = DateFormatter.FormatShort(data.SingingDate),
                 ["EntrepreneurSurnameInitials"] = FullnameFormatter.GetInitials(data.EntrepreneurFullName),
                 ["ContractorSurnameInitials"] = FullnameFormatter.GetInitials(data.ContractorFullName)
             };

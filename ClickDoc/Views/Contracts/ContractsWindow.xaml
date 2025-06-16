@@ -60,17 +60,16 @@
         <StackPanel Grid.Row="2" Grid.RowSpan="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">
-            <Button Content="Вернуться в меню"
-                    Width="135" Height="40"
-                    Command="{Binding BackCommand}"/>
+            
             <Button Content="Удалить договор"
-                    Margin="140, 0, 140, 0"
+                    Margin="0, 0, 100, 0"
                     Width="135" Height="40"
                     Command="{Binding DeleteCommand}"
                     IsEnabled="{Binding IsItemSelected}"/>
             <Button Content="Добавить договор"
                     Width="135" Height="40"
-                    Command="{Binding CreateNewCommand}"/>
+                    Command="{Binding CreateNewCommand}"
+                    Margin="100, 0, 0, 0"/>
         </StackPanel>
     </Grid>
 </Window>
