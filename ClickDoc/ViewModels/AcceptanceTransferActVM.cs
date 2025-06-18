@@ -134,7 +134,7 @@ namespace ClickDoc.ViewModels
 
             builder.RuleFor(a => a.SelectedItem)
                 .NotNull()
-                    .WithMessage("Выберите договор");
+                    .WithMessage("Выберите или создайте договор");
 
             builder.RuleFor(a => a.ActNumber)
                 .NotEmpty()
@@ -336,22 +336,22 @@ namespace ClickDoc.ViewModels
                 if (!string.IsNullOrEmpty(_customFilename))
                 {
                     // Проверяем, не совпадает ли текущее значение с автоматическим
-                    var autoName = GenerateAutoFilename();
+                    var autoName = GenerateFilename();
                     return _customFilename == autoName ? autoName : _customFilename;
                 }
 
-                return GenerateAutoFilename();
+                return GenerateFilename();
             }
             set
             {
                 // Сохраняем пользовательское значение, только если оно отличается от автоматического
-                var autoName = GenerateAutoFilename();
+                var autoName = GenerateFilename();
                 _customFilename = value == autoName ? null : value;
                 OnPropertyChanged(nameof(FileName));
             }
         }
 
-        private string GenerateAutoFilename()
+        private string GenerateFilename()
         {
             var filename = _baseFilename;
 

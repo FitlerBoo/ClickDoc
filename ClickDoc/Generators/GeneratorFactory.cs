@@ -16,8 +16,8 @@ namespace ClickDoc.Generators
 
         public static Dictionary<DocumentGeneratorType, string> GeneratorTypeDisplayNames => new()
         {
-            { DocumentGeneratorType.Pdf, "PDF документ" },
-            { DocumentGeneratorType.Word, "Word документ" }
+            { DocumentGeneratorType.Pdf, "PDF-документ" },
+            { DocumentGeneratorType.Word, "Word-документ" }
         };
     }
 
