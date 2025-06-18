@@ -73,37 +73,43 @@ namespace ClickDoc.ViewModels
         }
         private async Task Create()
         {
-            if (Validator.IsValid)
+            if (!Validator.IsValid)
             {
-                FormData formData;
-                try
-                {
-                    formData = GetFormData();
-                }
-                catch
-                {
-                    _notificationService.ShowError("Заполните форму правильно");
-                    return;
-                }
-                var contractData = new AcceptanceTransferActContractData(formData);
-                try
-                {
-                    IsButtonEnabled = false;
-                    var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    var generator = Generator;
-                    var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
-                    await generator.GenerateAsync(contractData, templatePath, FileName);
-                    IsButtonEnabled = true;
-                    _navigationService.CloseCurrentWindow();
-                }
-                catch (Exception ex)
-                {
-                    IsButtonEnabled = true;
-                    _notificationService.ShowError($"Ошибка пути к шаблону:\n{ex.Message}");
-                }
-            }
-            else
                 _notificationService.ShowError("Заполните форму");
+                return;
+            }
+
+            FormData formData;
+            try
+            {
+                formData = GetFormData();
+            }
+            catch
+            {
+                _notificationService.ShowError("Заполните форму правильно");
+                return;
+            }
+
+            try
+            {
+                IsButtonEnabled = false;
+                var contractData = new AcceptanceTransferActContractData(formData);
+                var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
+                var generator = Generator;
+
+                await generator.GenerateAsync(contractData, templatePath, FileName);
+                IsButtonEnabled = true;
+                _navigationService.CloseCurrentWindow();
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"Ошибка: {ex.Message}");
+            }
+            finally
+            {
+                IsButtonEnabled = true;
+            }
         }
 
         private FormData GetFormData()
@@ -134,7 +140,7 @@ namespace ClickDoc.ViewModels
 
             builder.RuleFor(a => a.SelectedItem)
                 .NotNull()
-                    .WithMessage("Выберите договор");
+                    .WithMessage("Выберите или создайте договор");
 
             builder.RuleFor(a => a.ActNumber)
                 .NotEmpty()
@@ -336,22 +342,22 @@ namespace ClickDoc.ViewModels
                 if (!string.IsNullOrEmpty(_customFilename))
                 {
                     // Проверяем, не совпадает ли текущее значение с автоматическим
-                    var autoName = GenerateAutoFilename();
+                    var autoName = GenerateFilename();
                     return _customFilename == autoName ? autoName : _customFilename;
                 }
 
-                return GenerateAutoFilename();
+                return GenerateFilename();
             }
             set
             {
                 // Сохраняем пользовательское значение, только если оно отличается от автоматического
-                var autoName = GenerateAutoFilename();
+                var autoName = GenerateFilename();
                 _customFilename = value == autoName ? null : value;
                 OnPropertyChanged(nameof(FileName));
             }
         }
 
-        private string GenerateAutoFilename()
+        private string GenerateFilename()
         {
             var filename = _baseFilename;
 

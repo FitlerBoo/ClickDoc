@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:ClickDoc.ViewModels"
         xmlns:local="clr-namespace:ClickDoc"
         mc:Ignorable="d"
-        Title="ClickDoc" Height="800" Width="800">
+        Title="ClickDoc" Height="600" Width="800">
 
     <!--Background="#FF8B73"-->
     <Grid>
@@ -59,14 +59,14 @@
                 Grid.Column="3"
                 Command="{Binding ManageContractsCommand}">
             <TextBlock 
-                Text="Контракты" 
+                Text="Договоры" 
                 TextWrapping="Wrap"
                 FontSize="18"
                 TextAlignment="Center"/>
         </Button>
 
         <!--Style="{StaticResource DowloadButtonStyle}"-->
-        <Button 
+        <!--<Button 
                 Height="200" Width="160"
                 Grid.Row="1"
                 Command="{Binding LoadDocumentCommand}">
@@ -75,6 +75,6 @@
                 TextWrapping="Wrap"
                 FontSize="18"
                 TextAlignment="Center"/>
-        </Button>
+        </Button>-->
     </Grid>
 </Window>
