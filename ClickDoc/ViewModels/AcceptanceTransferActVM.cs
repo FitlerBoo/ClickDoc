@@ -98,6 +98,7 @@ namespace ClickDoc.ViewModels
                 var templatePath = Path.Combine(appDirectory, "Templates", "AcceptanceTransferAct.docx");
                 var generator = Generator;
 
+                string filen= FileName;
                 await generator.GenerateAsync(contractData, templatePath, FileName);
                 IsButtonEnabled = true;
                 _navigationService.CloseCurrentWindow();
@@ -365,7 +366,7 @@ namespace ClickDoc.ViewModels
                 filename += $" №{ActNumber}";
 
             if (ActDate != default)
-                filename += $" от {ActDate:dd.MM.yyyy}";
+                filename += $" от {DateFormatter.FormatShort(ActDate)}";
 
             return filename;
         }

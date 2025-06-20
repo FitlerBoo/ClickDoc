@@ -49,7 +49,7 @@ namespace ClickDoc.Generators
             {
                 Filter = $"{FileExtension.ToUpper()} Files|*.{FileExtension}",
                 DefaultExt = $".{FileExtension}",
-                FileName = Path.GetFileNameWithoutExtension(filename)
+                FileName = filename
             };
 
             if (saveFileDialog.ShowDialog() != true)
